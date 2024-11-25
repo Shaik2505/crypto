@@ -1,0 +1,124 @@
+{
+  "posts": [
+    {
+      "id": "1",
+      "title": "Post 1",
+      "content": "This is the first post."
+    },
+    {
+      "id": "2",
+      "title": "Post 2",
+      "content": "This is the second post."
+    },
+    {
+      "id": "5373",
+      "phoneNumber": "9849825125",
+      "code": "6681"
+    },
+    {
+      "id": "6cb8",
+      "phoneNumber": "9849825125",
+      "code": "4687"
+    },
+    {
+      "id": "bd23",
+      "phoneNumber": "9849825125",
+      "code": "9568"
+    },
+    {
+      "id": "cdcf",
+      "phoneNumber": "9849825125",
+      "code": "3587"
+    },
+    {
+      "id": "15b4",
+      "phoneNumber": "9849825125",
+      "code": "1019"
+    },
+    {
+      "id": "63f3",
+      "phoneNumber": "9849825125",
+      "code": "1728"
+    },
+    {
+      "id": "e11a",
+      "phoneNumber": "9849825125",
+      "code": "1221"
+    },
+    {
+      "id": "4e46",
+      "phoneNumber": "9849825125",
+      "code": "9210"
+    },
+    {
+      "id": "236d",
+      "phoneNumber": "9849825125",
+      "code": "2064"
+    },
+    {
+      "id": "5a5f",
+      "phoneNumber": "9849825125",
+      "code": "7994"
+    },
+    {
+      "id": "d39e",
+      "phoneNumber": "9849825125",
+      "code": "3944"
+    },
+    {
+      "id": "dcd3",
+      "phoneNumber": "9849825125",
+      "code": "7532"
+    },
+    {
+      "id": "17eb",
+      "phoneNumber": "9849825125",
+      "code": "7772"
+    },
+    {
+      "id": "9765",
+      "phoneNumber": "+987 6789 9876 456",
+      "code": "4444"
+    },
+    {
+      "id": "9780",
+      "phoneNumber": "9849825125",
+      "code": "9669"
+    },
+    {
+      "id": "c56f",
+      "phoneNumber": "9849825125",
+      "code": "6283"
+    },
+    {
+      "id": "1122",
+      "phoneNumber": "9849825125",
+      "code": "4529"
+    },
+    {
+      "id": "3a46",
+      "phoneNumber": "9849825125",
+      "code": "1441"
+    }
+  ],
+  "comments": [
+    {
+      "id": "1",
+      "postId": 1,
+      "content": "Great post!"
+    },
+    {
+      "id": "2",
+      "postId": 2,
+      "content": "Thanks for sharing!"
+    }
+  ],
+  "users": [
+    {
+      "id": "aaf8",
+      "name": "Ayub",
+      "contact": "shaikshareef22@gmail.com",
+      "password": "Ayub@123"
+    }
+  ]
+}
