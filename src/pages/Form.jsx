@@ -76,7 +76,7 @@ const Form = () => {
     <div className="flex flex-col justify-center items-center min-h-screen bg-white dark:bg-offBlack">
       <form
         onSubmit={handleSubmit(onSubmit)}
-        className="bg-primary p-8 rounded-lg my-10 shadow-lg shadow-white w-full max-w-md border border-white dark:bg-darkGrey"
+        className="bg-primary p-8 rounded-lg shadow-lg shadow-white w-full max-w-md border border-white dark:bg-darkGrey"
       >
         <span className="mt-5">
           <IoSunny size={60} color="yellow" />

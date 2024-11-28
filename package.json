@@ -7,8 +7,7 @@
     "start": "vite",
     "build": "vite build",
     "lint": "eslint .",
-    "preview": "vite preview",
-    "json-server": "json-server --watch database.json --port 5000"
+    "preview": "vite preview"
   },
   "dependencies": {
     "@syncfusion/ej2-react-charts": "^27.2.3",

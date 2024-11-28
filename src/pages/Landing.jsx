@@ -66,13 +66,12 @@ const Landing = () => {
       {/* Navbar */}
       <nav className="sticky top-0 z-10 bg-primary text-offWhite px-4 py-3 flex justify-between items-center dark:bg-darkGrey">
         {/* Logo */}
-        <div className="flex items-center space-x-4">
-          <img
-            src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/57/Techno_Logo.svg/1200px-Techno_Logo.svg.png"
-            alt="Techno Logo"
-            className="h-8"
-          />
-        </div>
+        <Link
+          onClick={() => scrollToSection("home")}
+          className="flex items-center space-x-4"
+        >
+          <img src="" alt="Techno Logo" className="h-8" />
+        </Link>
 
         {/* Desktop Links */}
         <div className="hidden md:flex space-x-4 items-center">
@@ -174,14 +173,14 @@ const Landing = () => {
         id="home"
         className="bg-white text-center py-20 animate-fade-in dark:bg-offBlack"
       >
-        <h1 className="text-4xl font-bold mb-4">
+        <h1 className="text-4xl font-bold m-4">
           Buy, Trade, and Hold 350+ Cryptocurrencies
         </h1>
         <p className="text-gray-400 mb-6">
           Join millions of users in the world's leading crypto exchange.
         </p>
         <div className="flex justify-center space-x-4">
-          <button className="bg-primary text-white border hover:border-primary px-6 py-3 rounded-md transform hover:scale-110 hover:bg-white hover:text-primary transition-transform duration-500">
+          <button className="bg-primary text-white border hover:border-primary px-6 py-3 rounded-md transform hover:scale-110 hover:bg-white dark:bg-primary/50 hover:text-primary transition-transform duration-500">
             Get Started
           </button>
           <button className="border border-primary px-6 py-3 rounded-md transform hover:scale-110 hover:text-white hover:bg-primary transition-transform duration-500 dark:hover:bg-primary dark:hover:text-white">
@@ -248,60 +247,78 @@ const Landing = () => {
 
       {/* Contact us */}
       {/* Contact Us Section */}
-<section id="contact" className="py-16 px-6 bg-gray-100 dark:bg-darkGrey text-primary">
-  <h2 className="text-3xl font-bold text-center mb-8">Contact Us</h2>
-  <p className="text-center text-gray-500 mb-8">
-    We'd love to hear from you! Please fill out the form below and we will get back to you as soon as possible.
-  </p>
-  
-  {/* Contact Form */}
-  <div className="max-w-lg mx-auto bg-white p-8 rounded-lg shadow-lg dark:bg-darkGrey">
-    <form>
-      <div className="mb-4">
-        <label htmlFor="name" className="block text-lg font-medium text-gray-700 dark:text-gray-300">Your Name</label>
-        <input
-          type="text"
-          id="name"
-          name="name"
-          placeholder="Enter your name"
-          className="w-full px-4 py-2 mt-2 border rounded-md bg-gray-100 dark:bg-darkGrey dark:border-gray-600 dark:text-white"
-        />
-      </div>
+      <section
+        id="contact"
+        className="py-16 px-6 bg-gray-100 dark:bg-darkGrey text-primary"
+      >
+        <h2 className="text-3xl font-bold text-center mb-8">Contact Us</h2>
+        <p className="text-center text-gray-500 mb-8">
+          We'd love to hear from you! Please fill out the form below and we will
+          get back to you as soon as possible.
+        </p>
 
-      <div className="mb-4">
-        <label htmlFor="email" className="block text-lg font-medium text-gray-700 dark:text-gray-300">Your Email</label>
-        <input
-          type="email"
-          id="email"
-          name="email"
-          placeholder="Enter your email"
-          className="w-full px-4 py-2 mt-2 border rounded-md bg-gray-100 dark:bg-darkGrey dark:border-gray-600 dark:text-white"
-        />
-      </div>
+        {/* Contact Form */}
+        <div className="max-w-lg mx-auto bg-white p-8 rounded-lg shadow-lg dark:bg-OffBlack">
+          <form>
+            <div className="mb-4">
+              <label
+                htmlFor="name"
+                className="block text-lg font-medium text-gray-700 dark:text-gray-300"
+              >
+                Your Name
+              </label>
+              <input
+                type="text"
+                id="name"
+                name="name"
+                placeholder="Enter your name"
+                className="w-full px-4 py-2 mt-2 border rounded-md bg-gray-100 dark:bg-darkGrey dark:border-gray-600 dark:text-white"
+              />
+            </div>
 
-      <div className="mb-4">
-        <label htmlFor="message" className="block text-lg font-medium text-gray-700 dark:text-gray-300">Your Message</label>
-        <textarea
-          id="message"
-          name="message"
-          rows="4"
-          placeholder="Enter your message"
-          className="w-full px-4 py-2 mt-2 border rounded-md bg-gray-100 dark:bg-darkGrey dark:border-gray-600 dark:text-white"
-        />
-      </div>
+            <div className="mb-4">
+              <label
+                htmlFor="email"
+                className="block text-lg font-medium text-gray-700 dark:text-gray-300"
+              >
+                Your Email
+              </label>
+              <input
+                type="email"
+                id="email"
+                name="email"
+                placeholder="Enter your email"
+                className="w-full px-4 py-2 mt-2 border rounded-md bg-gray-100 dark:bg-darkGrey dark:border-gray-600 dark:text-white"
+              />
+            </div>
 
-      <div className="text-center">
-        <button
-          type="submit"
-          className="bg-primary text-white px-6 py-3 rounded-md transform hover:scale-110 hover:bg-yellow-500 transition-transform duration-300"
-        >
-          Send Message
-        </button>
-      </div>
-    </form>
-  </div>
-</section>
+            <div className="mb-4">
+              <label
+                htmlFor="message"
+                className="block text-lg font-medium text-gray-700 dark:text-gray-300"
+              >
+                Your Message
+              </label>
+              <textarea
+                id="message"
+                name="message"
+                rows="4"
+                placeholder="Enter your message"
+                className="w-full px-4 py-2 mt-2 border rounded-md bg-gray-100 dark:bg-darkGrey dark:border-gray-600 dark:text-white"
+              />
+            </div>
 
+            <div className="text-center">
+              <button
+                type="submit"
+                className="bg-primary text-white px-6 py-3 rounded-md transform hover:scale-110 hover:bg-yellow-500 transition-transform duration-300"
+              >
+                Send Message
+              </button>
+            </div>
+          </form>
+        </div>
+      </section>
 
       {/* Market Overview Section */}
       <section className="py-16 px-6 bg-gray-200 text-primary dark:bg-offBlack">

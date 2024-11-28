@@ -82,21 +82,21 @@ const CryptoTracker = () => {
   );
 
   return (
-    <div className="pt-12 bg-white text-blue-500 min-h-screen dark:bg-offBlack dark:text-white ">
+    <div className="pt-12 bg-white text-blue-500 min-h-screen dark:bg-offBlack dark:text-white">
       <div className="container mx-auto p-6">
-        <div className="flex justify-between items-center mb-6">
-          <h1 className="text-3xl font-bold">Crypto Price Tracker</h1>
-          <div className="flex items-center space-x-4">
+        <div className="flex flex-wrap justify-between items-center mb-6">
+          <h1 className="text-3xl font-bold w-full sm:w-auto md:w-auto">Crypto Price Tracker</h1>
+          <div className="flex items-center space-x-4 w-full sm:w-auto mt-4 sm:mt-0">
             <input
               type="text"
               placeholder="Search coins"
-              className="border border-blue-400 p-2 rounded-md bg-white text-blue-500"
+              className="border border-blue-400 p-2 rounded-md bg-white text-blue-500 w-full sm:w-auto"
               onChange={handleSearch}
             />
             <select
               value={currency}
               onChange={(e) => setCurrency(e.target.value)}
-              className="border border-blue-400 p-2 rounded-md bg-white text-blue-500"
+              className="border border-blue-400 p-2 rounded-md bg-white text-blue-500 w-full sm:w-auto"
             >
               <option value="usd">USD</option>
               <option value="eur">EUR</option>
@@ -114,14 +114,24 @@ const CryptoTracker = () => {
         ) : (
           <>
             <div className="overflow-x-auto mb-8">
-              <table className="table-auto w-full text-center ">
+              <table className="table-auto w-full text-center">
                 <thead>
                   <tr>
-                    <th className="border border-blue-400 hover:bg-blue-400 cursor hover:text-white px-4 py-2 ">Name</th>
-                    <th className="border border-blue-400 hover:bg-blue-400 cursor hover:text-white px-4 py-2">Price</th>
-                    <th className="border border-blue-400 hover:bg-blue-400 cursor hover:text-white px-4 py-2">Market Cap</th>
-                    <th className="border border-blue-400 hover:bg-blue-400 cursor hover:text-white px-4 py-2">Volume</th>
-                    <th className="border border-blue-400 hover:bg-blue-400 cursor hover:text-white px-4 py-2">24h Change (%)</th>
+                    <th className="border border-blue-400 hover:bg-blue-400 cursor hover:text-white px-4 py-2">
+                      Name
+                    </th>
+                    <th className="border border-blue-400 hover:bg-blue-400 cursor hover:text-white px-4 py-2">
+                      Price
+                    </th>
+                    <th className="border border-blue-400 hover:bg-blue-400 cursor hover:text-white px-4 py-2">
+                      Market Cap
+                    </th>
+                    <th className="border border-blue-400 hover:bg-blue-400 cursor hover:text-white px-4 py-2">
+                      Volume
+                    </th>
+                    <th className="border border-blue-400 hover:bg-blue-400 cursor hover:text-white px-4 py-2">
+                      24h Change (%)
+                    </th>
                   </tr>
                 </thead>
                 <tbody>
@@ -185,7 +195,7 @@ const CryptoTracker = () => {
               {filteredCoins.map((coin) => (
                 <div
                   key={coin.id}
-                  className="rounded-lg p-4 bg-gradient-to-r from-purple-500 to-blue-500 text-white hover:shadow-xl transition-shadow "
+                  className="rounded-lg p-4 bg-gradient-to-r from-purple-500 to-blue-500 text-white hover:shadow-xl transition-shadow"
                 >
                   <h2 className="text-xl font-semibold">
                     {coin.name} ({coin.symbol.toUpperCase()})

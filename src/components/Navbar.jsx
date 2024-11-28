@@ -12,29 +12,60 @@ const Navbar = () => {
 
   const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
 
+  // Retry logic for API requests in case of rate-limiting
+  const fetchWithRetry = (url, options, retries = 3, delay = 1000) => {
+    return new Promise((resolve, reject) => {
+      fetch(url, options)
+        .then((response) => {
+          if (response.status === 429 && retries > 0) {
+            setTimeout(() => {
+              fetchWithRetry(url, options, retries - 1, delay).then(resolve).catch(reject);
+            }, delay);
+          } else if (response.ok) {
+            resolve(response.json());
+          } else {
+            reject(new Error(`Request failed with status ${response.status}`));
+          }
+        })
+        .catch(reject);
+    });
+  };
+
   // Fetch initial cryptocurrency data to display in the modal
   useEffect(() => {
-    fetch("https://api.coingecko.com/api/v3/coins/markets", {
-      params: {
+    const cachedData = localStorage.getItem("cryptoData");
+
+    if (cachedData) {
+      // Use cached data if available
+      setInitialData(JSON.parse(cachedData));
+    } else {
+      // Construct the query string
+      const url = new URL("https://api.coingecko.com/api/v3/coins/markets");
+      const params = {
         vs_currency: "usd",
         order: "market_cap_desc",
-        per_page: 5, // Show top 5 cryptocurrencies initially
+        per_page: 5,
         page: 1,
-      },
-    })
-      .then((response) => response.json())
-      .then((data) => {
-        console.log("Initial data fetched:", data); // Log the initial data
-        setInitialData(data);
+      };
+      url.search = new URLSearchParams(params).toString(); // Add query parameters to the URL
+
+      fetchWithRetry(url.toString(), {
+        method: "GET",
       })
-      .catch((error) => console.error("Error fetching initial data:", error));
+        .then((data) => {
+          console.log("Initial data fetched:", data); // Log the initial data
+          setInitialData(data);
+          // Cache the data for future use
+          localStorage.setItem("cryptoData", JSON.stringify(data));
+        })
+        .catch((error) => console.error("Error fetching initial data:", error));
+    }
   }, []);
 
   // API call to fetch cryptocurrency data based on the search query
   useEffect(() => {
     if (searchQuery.length > 0) {
-      fetch(`https://api.coingecko.com/api/v3/search?query=${searchQuery}`)
-        .then((response) => response.json())
+      fetchWithRetry(`https://api.coingecko.com/api/v3/search?query=${searchQuery}`)
         .then((data) => {
           console.log("Search data fetched:", data); // Log the search data
           setCryptoData(data.coins || []); // Ensure we handle the response correctly
@@ -58,7 +89,7 @@ const Navbar = () => {
 
   return (
     <div className="bg-primary text-white fixed top-0 w-full z-50 shadow-md dark:bg-darkGrey">
-      <div className="container mx-auto flex justify-between items-center p-4 transition-all duration-500">
+      <div className="container  mx-auto flex flex-wrap justify-between items-center p-4 transition-all duration-500">
         <Link to={"/"}>
           <div className="text-lg font-bold text-yellow-300 hover:text-white transition-all duration-300">
             Techno Clone
@@ -66,7 +97,7 @@ const Navbar = () => {
         </Link>
         <div className="hidden md:flex space-x-6">
           {navLinks.map((link, index) => (
-            <Link key={index} to={link.to} className="hover:text-offWhite transition-all duration-300">
+            <Link key={index} to={link.to} className="hover:text-offWhite transition-all duration-300" onClick={() => setIsSidebarOpen(false)}>
               {link.label}
             </Link>
           ))}
@@ -87,6 +118,7 @@ const Navbar = () => {
             <Link
               key={link.to}
               to={link.to}
+              onClick={() => setIsSidebarOpen(false)} // Collapse sidebar on link click
               className="block text-sm text-white py-2 hover:text-offWhite transition-all duration-300"
             >
               {link.label}
