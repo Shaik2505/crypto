@@ -24,7 +24,7 @@ const Form = () => {
     if (isSignIn) {
       // Sign-in Logic
       try {
-        const response = await axios.get("http://localhost:5000/users", {
+        const response = await axios.get("http://localhost:3000/users", {
           params: {
             contact: data.contact,
           },
@@ -76,7 +76,7 @@ const Form = () => {
     <div className="flex flex-col justify-center items-center min-h-screen bg-white dark:bg-offBlack">
       <form
         onSubmit={handleSubmit(onSubmit)}
-        className="bg-primary p-8 rounded-lg shadow-lg shadow-white w-full max-w-md border border-white dark:bg-darkGrey"
+        className="bg-primary m-5 p-8 rounded-lg shadow-lg shadow-white w-full max-w-md border border-white dark:bg-darkGrey"
       >
         <span className="mt-5">
           <IoSunny size={60} color="yellow" />

@@ -1,25 +1,51 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { FaBell, FaSearch, FaUser } from "react-icons/fa";
 import { Link } from "react-router-dom";
 import ThemeBtn from "./ThemeBtn";
 
 const Navbar = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const [isSearchOpen, setIsSearchOpen] = useState(false); // Popup visibility
-  const [searchQuery, setSearchQuery] = useState(""); // Search input state
-  const [cryptoData, setCryptoData] = useState([]); // Cryptocurrency data
-  const [initialData, setInitialData] = useState([]); // Initial data for display
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [cryptoData, setCryptoData] = useState([]);
+  const [initialData, setInitialData] = useState([]);
+  const sidebarRef = useRef(null);
+  const modalRef = useRef(null);
 
   const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
 
-  // Retry logic for API requests in case of rate-limiting
+  const openSearchModal = () => {
+    setIsSearchOpen(true);
+    setIsSidebarOpen(false); // Ensure the sidebar closes
+  };
+
+  const handleClickOutside = (e) => {
+    if (modalRef.current && !modalRef.current.contains(e.target)) {
+      setIsSearchOpen(false);
+      setSearchQuery("");
+      setCryptoData([]);
+    }
+    if (sidebarRef.current && !sidebarRef.current.contains(e.target)) {
+      setIsSidebarOpen(false);
+    }
+  };
+
+  useEffect(() => {
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
+
   const fetchWithRetry = (url, options, retries = 3, delay = 1000) => {
     return new Promise((resolve, reject) => {
       fetch(url, options)
         .then((response) => {
           if (response.status === 429 && retries > 0) {
             setTimeout(() => {
-              fetchWithRetry(url, options, retries - 1, delay).then(resolve).catch(reject);
+              fetchWithRetry(url, options, retries - 1, delay)
+                .then(resolve)
+                .catch(reject);
             }, delay);
           } else if (response.ok) {
             resolve(response.json());
@@ -31,15 +57,11 @@ const Navbar = () => {
     });
   };
 
-  // Fetch initial cryptocurrency data to display in the modal
   useEffect(() => {
     const cachedData = localStorage.getItem("cryptoData");
-
     if (cachedData) {
-      // Use cached data if available
       setInitialData(JSON.parse(cachedData));
     } else {
-      // Construct the query string
       const url = new URL("https://api.coingecko.com/api/v3/coins/markets");
       const params = {
         vs_currency: "usd",
@@ -47,41 +69,44 @@ const Navbar = () => {
         per_page: 5,
         page: 1,
       };
-      url.search = new URLSearchParams(params).toString(); // Add query parameters to the URL
+      url.search = new URLSearchParams(params).toString();
 
-      fetchWithRetry(url.toString(), {
-        method: "GET",
-      })
+      fetchWithRetry(url.toString(), { method: "GET" })
         .then((data) => {
-          console.log("Initial data fetched:", data); // Log the initial data
           setInitialData(data);
-          // Cache the data for future use
           localStorage.setItem("cryptoData", JSON.stringify(data));
         })
         .catch((error) => console.error("Error fetching initial data:", error));
     }
   }, []);
 
-  // API call to fetch cryptocurrency data based on the search query
   useEffect(() => {
     if (searchQuery.length > 0) {
-      fetchWithRetry(`https://api.coingecko.com/api/v3/search?query=${searchQuery}`)
-        .then((data) => {
-          console.log("Search data fetched:", data); // Log the search data
-          setCryptoData(data.coins || []); // Ensure we handle the response correctly
-        })
+      fetchWithRetry(
+        `https://api.coingecko.com/api/v3/search?query=${searchQuery}`
+      )
+        .then((data) => setCryptoData(data.coins || []))
         .catch((error) => console.error("Error fetching data:", error));
     } else {
-      setCryptoData([]); // Clear search results when query is empty
+      setCryptoData([]);
     }
   }, [searchQuery]);
 
   const navLinks = [
-    { to: "/dashboard", label: "Dashboard" },
-    { to: "/pricetracking", label: "Price Tracking" },
-    { to: "/profile", label: <FaSearch size={25} onClick={() => setIsSearchOpen(!isSearchOpen)} /> }, // Open/close the search popup
-    { to: "/notification", label: <FaBell size={25} /> },
-    { to: "/profile", label: <FaUser size={25} /> },
+    { to: "/dashboard", label: "Dashboard", key: "dashboard" },
+    { to: "/pricetracking", label: "Price Tracking", key: "pricetracking" },
+    {
+      label: (
+        <FaSearch
+          size={25}
+          className="cursor-pointer"
+          onClick={openSearchModal} // Close sidebar and open search modal
+        />
+      ),
+      key: "search-icon",
+    },
+    { to: "/notification", label: <FaBell size={25} />, key: "notification" },
+    { to: "/profile", label: <FaUser size={25} />, key: "profile" },
   ];
 
   const buttonClasses =
@@ -89,104 +114,129 @@ const Navbar = () => {
 
   return (
     <div className="bg-primary text-white fixed top-0 w-full z-50 shadow-md dark:bg-darkGrey">
-      <div className="container  mx-auto flex flex-wrap justify-between items-center p-4 transition-all duration-500">
-        <Link to={"/"}>
-          <div className="text-lg font-bold text-yellow-300 hover:text-white transition-all duration-300">
+      <div className="container mx-auto flex flex-wrap justify-between items-center p-4">
+        <Link
+          to="/dashboard"
+          onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+        >
+          <div className="text-lg font-bold text-primary hover:text-white transition-all duration-300">
             Techno Clone
           </div>
         </Link>
         <div className="hidden md:flex space-x-6">
-          {navLinks.map((link, index) => (
-            <Link key={index} to={link.to} className="hover:text-offWhite transition-all duration-300" onClick={() => setIsSidebarOpen(false)}>
-              {link.label}
-            </Link>
+          {navLinks.map((link) => (
+            <React.Fragment key={link.key}>
+              {link.to ? (
+                <Link
+                  to={link.to}
+                  className="hover:text-offWhite transition-all duration-300"
+                  onClick={() => setIsSidebarOpen(false)}
+                >
+                  {link.label}
+                </Link>
+              ) : (
+                <span className="hover:text-offWhite transition-all duration-300">
+                  {link.label}
+                </span>
+              )}
+            </React.Fragment>
           ))}
           <ThemeBtn className="mb-2" />
           <Link to={"/"} className="hover:text-offWhite">
             <button className={buttonClasses}>Log Out</button>
           </Link>
         </div>
-
-        <div className="md:hidden cursor-pointer" onClick={toggleSidebar}>
-          {isSidebarOpen ? "✖" : "☰"}
+        <div className="md:hidden cursor-pointer flex gap-2">
+          <ThemeBtn />
+          <span className="text-xl font-bold" onClick={toggleSidebar}>
+            {isSidebarOpen ? "✖" : "☰"}
+          </span>
         </div>
       </div>
 
       {isSidebarOpen && (
-        <div className="md:hidden flex items-center flex-col gap-2 bg-gray-700 w-full p-4 transition-all duration-500">
-          {navLinks.map((link) => (
-            <Link
-              key={link.to}
-              to={link.to}
-              onClick={() => setIsSidebarOpen(false)} // Collapse sidebar on link click
-              className="block text-sm text-white py-2 hover:text-offWhite transition-all duration-300"
-            >
-              {link.label}
+        <div className="md:hidden fixed inset-0 bg-black bg-opacity-50 z-40">
+          <div
+            ref={sidebarRef}
+            className="flex items-center flex-col gap-2 bg-gray-700 w-full p-4"
+          >
+            {navLinks.map((link) => (
+              <React.Fragment key={link.key}>
+                {link.to ? (
+                  <Link
+                    to={link.to}
+                    onClick={() => setIsSidebarOpen(false)}
+                    className="block text-sm text-white py-2 hover:text-offWhite"
+                  >
+                    {link.label}
+                  </Link>
+                ) : (
+                  <span className="block text-sm text-white py-2 hover:text-offWhite">
+                    {link.label}
+                  </span>
+                )}
+              </React.Fragment>
+            ))}
+            <Link to={"/"}>
+              <button className={`${buttonClasses} mt-4`}>Log Out</button>
             </Link>
-          ))}
-          <ThemeBtn />
-          <Link to={"/"}>
-            <button className={`${buttonClasses} mt-4`}>Log Out</button>
-          </Link>
+          </div>
         </div>
       )}
 
-      {/* Search Popup with transition */}
       {isSearchOpen && (
-        <div className="fixed top-0 left-0 right-0 bottom-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
-          <div className="bg-white p-6 rounded-lg shadow-lg w-11/12 sm:w-1/2 max-h-[80vh] overflow-y-auto transition-transform duration-500 transform scale-110">
+        <div className="fixed top-0 left-0 w-full h-full bg-black bg-opacity-50 z-50 flex justify-center items-center pointer-events-auto">
+          <div
+            ref={modalRef}
+            className="relative w-11/12 sm:w-1/2 lg:w-1/3 bg-white text-black rounded-lg shadow-lg p-6 max-h-[80vh] overflow-y-auto dark:bg-darkGrey"
+          >
+            <button
+              className="absolute top-3 right-3 text-gray-500 hover:text-gray-700 text-xl"
+              onClick={() => {
+                setIsSearchOpen(false);
+                setSearchQuery("");
+                setCryptoData([]);
+              }}
+            >
+              ✖
+            </button>
+            <h3 className="text-lg font-bold text-primary mb-4">
+              Search Cryptocurrencies
+            </h3>
             <input
               type="text"
-              className="w-full p-2 border text-black border-gray-300 rounded-md"
+              className="w-full p-2 border border-gray-300 rounded-md dark:bg-offBlack dark:text-white"
               placeholder="Search for cryptocurrencies"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
             />
-
-            {/* Initial Data (Table) */}
-            {searchQuery.length === 0 && initialData.length > 0 && (
-              <div className="mt-4">
-                <h3 className="text-lg font-bold mb-2">Top Cryptocurrencies</h3>
-                <table className="w-full table-auto border-collapse">
-                  <thead>
-                    <tr>
-                      <th className="py-2 px-4 border">Name</th>
-                      <th className="py-2 px-4 border">Price (USD)</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {initialData.map((crypto) => (
-                      <tr key={crypto.id} className="hover:bg-gray-100 transition-all duration-300">
-                        <td className="py-2 px-4 border">{crypto.name}</td>
-                        <td className="py-2 px-4 border">${crypto.current_price}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            )}
-
-            {/* Search Results */}
-            <div className="mt-4">
-              {cryptoData.length > 0 ? (
-                <ul>
-                  {cryptoData.map((crypto) => (
-                    <li
-                      key={crypto.id}
-                      className="flex justify-between p-2 text-black hover:bg-gray-200 rounded-md transition-all duration-300"
-                    >
-                      <span>{crypto.name}</span>
-                      <span>{crypto.current_price ? `$${crypto.current_price}` : "N/A"}</span>
-                    </li>
-                  ))}
-                </ul>
-              ) : (
-                <p>No results found</p>
+            <ul className="mt-4 space-y-2">
+              {(searchQuery.length > 0 ? cryptoData : initialData).map(
+                (crypto) => (
+                  <li
+                    key={crypto.id}
+                    className="flex justify-between p-2 bg-gray-100 hover:bg-gray-200 rounded-md transition-all duration-300 dark:bg-offBlack dark:text-white"
+                  >
+                    <span>{crypto.name}</span>
+                    <span>
+                      {crypto.current_price
+                        ? `$${crypto.current_price}`
+                        : "N/A"}
+                    </span>
+                  </li>
+                )
               )}
-            </div>
+            </ul>
+            {cryptoData.length === 0 && searchQuery.length > 0 && (
+              <p className="text-gray-500 mt-4">No results found</p>
+            )}
             <button
-              onClick={() => setIsSearchOpen(false)}
-              className="mt-4 w-full py-2 bg-blue-500 text-white rounded-md transition-all duration-300 hover:bg-blue-600"
+              onClick={() => {
+                setIsSearchOpen(false);
+                setSearchQuery("");
+                setCryptoData([]);
+              }}
+              className="mt-6 w-full py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600"
             >
               Close
             </button>

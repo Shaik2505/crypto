@@ -61,8 +61,10 @@ const Landing = () => {
     fetchCryptoData();
   }, []);
 
+  const formInputStyle = "w-full px-4 py-2 mt-2 border rounded-md bg-gray-100 dark:bg-gray-800 dark:border-gray-600 dark:text-darkGrey"
+
   return (
-    <div className="bg-white text-primary font-sans dark:bg-darkGrey">
+    <div className="bg-white text-primary font-sans dark:bg-gray-800">
       {/* Navbar */}
       <nav className="sticky top-0 z-10 bg-primary text-offWhite px-4 py-3 flex justify-between items-center dark:bg-darkGrey">
         {/* Logo */}
@@ -146,7 +148,7 @@ const Landing = () => {
           <div className="space-y-4">
             <Link
               to={"/form"}
-              className="bg-white text-primary mr-2 px-4 py-2 rounded-md transform hover:scale-105 hover:bg-yellow-500 transition-transform duration-300 dark:text-offBlack"
+              className="bg-white text-primary mr-2 px-4 py-2 rounded-md transform hover:scale-105 hover:primary transition-transform duration-300 dark:text-offBlack"
               onClick={closeMobileMenu}
             >
               Sign Up
@@ -258,9 +260,9 @@ const Landing = () => {
         </p>
 
         {/* Contact Form */}
-        <div className="max-w-lg mx-auto bg-white p-8 rounded-lg shadow-lg dark:bg-OffBlack">
+        <div className="max-w-lg mx-auto bg-white p-8 rounded-lg shadow-lg dark:bg-offBlack border-white">
           <form>
-            <div className="mb-4">
+            <div className="mb-4 ">
               <label
                 htmlFor="name"
                 className="block text-lg font-medium text-gray-700 dark:text-gray-300"
@@ -272,7 +274,7 @@ const Landing = () => {
                 id="name"
                 name="name"
                 placeholder="Enter your name"
-                className="w-full px-4 py-2 mt-2 border rounded-md bg-gray-100 dark:bg-darkGrey dark:border-gray-600 dark:text-white"
+                className={formInputStyle}
               />
             </div>
 
@@ -288,7 +290,7 @@ const Landing = () => {
                 id="email"
                 name="email"
                 placeholder="Enter your email"
-                className="w-full px-4 py-2 mt-2 border rounded-md bg-gray-100 dark:bg-darkGrey dark:border-gray-600 dark:text-white"
+                className={formInputStyle}
               />
             </div>
 
@@ -304,14 +306,14 @@ const Landing = () => {
                 name="message"
                 rows="4"
                 placeholder="Enter your message"
-                className="w-full px-4 py-2 mt-2 border rounded-md bg-gray-100 dark:bg-darkGrey dark:border-gray-600 dark:text-white"
+                className={formInputStyle}
               />
             </div>
 
             <div className="text-center">
               <button
                 type="submit"
-                className="bg-primary text-white px-6 py-3 rounded-md transform hover:scale-110 hover:bg-yellow-500 transition-transform duration-300"
+                className="bg-primary text-white px-6 py-3 rounded-md transform hover:scale-110 hover:primary transition-transform duration-300"
               >
                 Send Message
               </button>

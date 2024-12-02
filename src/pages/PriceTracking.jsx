@@ -1,24 +1,75 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import {
-  AreaChart,
-  Area,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  ResponsiveContainer,
-} from "recharts";
+import CryptoTable from "../components/PriceTracker/CryptoTable";
+import CryptoCharts from "../components/PriceTracker/CryptoCharts";
 
-const CryptoTracker = () => {
+const staticCoins = [
+  {
+    id: "bitcoin",
+    symbol: "btc",
+    name: "Bitcoin",
+    current_price: 47000,
+    market_cap: 880000000000,
+    total_volume: 35000000000,
+    price_change_percentage_24h: -1.2,
+  },
+  {
+    id: "ethereum",
+    symbol: "eth",
+    name: "Ethereum",
+    current_price: 3200,
+    market_cap: 380000000000,
+    total_volume: 20000000000,
+    price_change_percentage_24h: 2.3,
+  },
+  {
+    id: "litecoin",
+    symbol: "ltc",
+    name: "Litecoin",
+    current_price: 250,
+    market_cap: 16000000000,
+    total_volume: 3000000000,
+    price_change_percentage_24h: 1.1,
+  },
+  // Add more static coin data as needed
+];
+
+const staticCoinHistory = {
+  bitcoin: [
+    { time: "11/22/2024", price: 47000 },
+    { time: "11/23/2024", price: 47200 },
+    { time: "11/24/2024", price: 46800 },
+    // Add more history data as needed
+  ],
+  ethereum: [
+    { time: "11/22/2024", price: 3200 },
+    { time: "11/23/2024", price: 3250 },
+    { time: "11/24/2024", price: 3150 },
+    // Add more history data as needed
+  ],
+  litecoin: [
+    { time: "11/22/2024", price: 250 },
+    { time: "11/23/2024", price: 260 },
+    { time: "11/24/2024", price: 240 },
+    // Add more history data as needed
+  ],
+  // Add more coin history as needed
+};
+
+const PriceTracking = () => {
   const [coins, setCoins] = useState([]);
   const [currency, setCurrency] = useState("usd");
   const [error, setError] = useState("");
   const [search, setSearch] = useState("");
-  const [coinHistory, setCoinHistory] = useState([]);
+  const [coinHistory, setCoinHistory] = useState({});
   const [loading, setLoading] = useState(true);
 
-  // Fetch data from API
+  const currencySymbols = {
+    usd: "$",
+    eur: "€",
+    btc: "₿",
+  };
+
   const fetchData = async () => {
     setLoading(true);
     try {
@@ -35,33 +86,45 @@ const CryptoTracker = () => {
       );
       setCoins(response.data);
       setError("");
-      fetchCoinHistory(response.data[0].id); // Fetch history for the first coin
+      fetchCoinHistory(response.data);
     } catch (error) {
-      setError("Error fetching data");
+      if (error.response && error.response.status === 429) {
+        setCoins(staticCoins);
+        setCoinHistory(staticCoinHistory);
+      } else {
+        setError("Error fetching data");
+      }
     } finally {
       setLoading(false);
     }
   };
 
-  // Fetch price history data for a specific coin
-  const fetchCoinHistory = async (coinId) => {
+  const fetchCoinHistory = async (coins) => {
     try {
-      const response = await axios.get(
-        `https://api.coingecko.com/api/v3/coins/${coinId}/market_chart`,
-        {
-          params: {
-            vs_currency: currency,
-            days: 7, // Fetching 7-day history
-          },
-        }
-      );
-      const formattedData = response.data.prices.map(([time, price]) => ({
-        time: new Date(time).toLocaleDateString(),
-        price,
-      }));
-      setCoinHistory(formattedData);
+      const historyData = {};
+      for (const coin of coins) {
+        const response = await axios.get(
+          `https://api.coingecko.com/api/v3/coins/${coin.id}/market_chart`,
+          {
+            params: {
+              vs_currency: currency,
+              days: 7,
+            },
+          }
+        );
+        const formattedData = response.data.prices.map(([time, price]) => ({
+          time: new Date(time).toLocaleDateString(),
+          price,
+        }));
+        historyData[coin.id] = formattedData;
+      }
+      setCoinHistory(historyData);
     } catch (error) {
-      setError("Error fetching coin history");
+      if (error.response && error.response.status === 429) {
+        setCoinHistory(staticCoinHistory);
+      } else {
+        setError("Error fetching coin history");
+      }
     }
   };
 
@@ -85,7 +148,9 @@ const CryptoTracker = () => {
     <div className="pt-12 bg-white text-blue-500 min-h-screen dark:bg-offBlack dark:text-white">
       <div className="container mx-auto p-6">
         <div className="flex flex-wrap justify-between items-center mb-6">
-          <h1 className="text-3xl font-bold w-full sm:w-auto md:w-auto">Crypto Price Tracker</h1>
+          <h1 className="text-3xl font-bold w-full sm:w-auto md:w-auto">
+            Crypto Price Tracker
+          </h1>
           <div className="flex items-center space-x-4 w-full sm:w-auto mt-4 sm:mt-0">
             <input
               type="text"
@@ -112,118 +177,23 @@ const CryptoTracker = () => {
             <div className="spinner-border animate-spin w-16 h-16 border-t-4 border-blue-500 rounded-full"></div>
           </div>
         ) : (
-          <>
-            <div className="overflow-x-auto mb-8">
-              <table className="table-auto w-full text-center">
-                <thead>
-                  <tr>
-                    <th className="border border-blue-400 hover:bg-blue-400 cursor hover:text-white px-4 py-2">
-                      Name
-                    </th>
-                    <th className="border border-blue-400 hover:bg-blue-400 cursor hover:text-white px-4 py-2">
-                      Price
-                    </th>
-                    <th className="border border-blue-400 hover:bg-blue-400 cursor hover:text-white px-4 py-2">
-                      Market Cap
-                    </th>
-                    <th className="border border-blue-400 hover:bg-blue-400 cursor hover:text-white px-4 py-2">
-                      Volume
-                    </th>
-                    <th className="border border-blue-400 hover:bg-blue-400 cursor hover:text-white px-4 py-2">
-                      24h Change (%)
-                    </th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {filteredCoins.map((coin) => (
-                    <tr
-                      key={coin.id}
-                      className="hover:bg-blue-100 cursor-pointer dark:hover:bg-darkGrey"
-                    >
-                      <td className="border border-blue-400 px-4 py-2">
-                        {coin.name} ({coin.symbol.toUpperCase()})
-                      </td>
-                      <td className="border border-blue-400 px-4 py-2">
-                        ${coin.current_price}
-                      </td>
-                      <td className="border border-blue-400 px-4 py-2">
-                        ${coin.market_cap.toLocaleString()}
-                      </td>
-                      <td className="border border-blue-400 px-4 py-2">
-                        ${coin.total_volume.toLocaleString()}
-                      </td>
-                      <td
-                        className={`border border-blue-400 px-4 py-2 ${
-                          coin.price_change_percentage_24h >= 0
-                            ? "text-green-500"
-                            : "text-red-500"
-                        }`}
-                      >
-                        {coin.price_change_percentage_24h.toFixed(2)}%
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-
-            <div className="mt-8">
-              <h2 className="text-2xl mb-4">Price History (7 Days)</h2>
-              <ResponsiveContainer width="100%" height={400}>
-                <AreaChart data={coinHistory}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="time" />
-                  <YAxis />
-                  <Tooltip />
-                  <Area
-                    type="monotone"
-                    dataKey="price"
-                    stroke="#8884d8"
-                    fill="url(#gradient)"
-                  />
-                  <defs>
-                    <linearGradient id="gradient" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#8884d8" stopOpacity={0.8} />
-                      <stop offset="95%" stopColor="#8884d8" stopOpacity={0} />
-                    </linearGradient>
-                  </defs>
-                </AreaChart>
-              </ResponsiveContainer>
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 mt-8">
-              {filteredCoins.map((coin) => (
-                <div
-                  key={coin.id}
-                  className="rounded-lg p-4 bg-gradient-to-r from-purple-500 to-blue-500 text-white hover:shadow-xl transition-shadow"
-                >
-                  <h2 className="text-xl font-semibold">
-                    {coin.name} ({coin.symbol.toUpperCase()})
-                  </h2>
-                  <p className="text-lg mt-2">Price: ${coin.current_price}</p>
-                  <p className="mt-1">
-                    Market Cap: ${coin.market_cap.toLocaleString()}
-                  </p>
-                  <p className="mt-1">
-                    24h Volume: ${coin.total_volume.toLocaleString()}
-                  </p>
-                  <p
-                    className={`mt-1 ${
-                      coin.price_change_percentage_24h >= 0
-                        ? "text-green-500"
-                        : "text-red-500 font-bold"
-                    }`}
-                  >
-                    24h Change: {coin.price_change_percentage_24h.toFixed(2)}%
-                  </p>
-                </div>
-              ))}
-            </div>
-          </>
+          <div className="grid grid-cols-1 lg:grid-cols-2 items- justify-center gap-8">
+            <CryptoTable
+              coins={filteredCoins}
+              currencySymbols={currencySymbols}
+              currency={currency}
+            />
+            <CryptoCharts
+              coinHistory={coinHistory}
+              filteredCoins={filteredCoins}
+              currencySymbols={currencySymbols}
+              currency={currency}
+            />
+          </div>
         )}
       </div>
     </div>
   );
 };
 
-export default CryptoTracker;
+export default PriceTracking;

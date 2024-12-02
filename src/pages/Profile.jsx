@@ -5,6 +5,7 @@ import PhoneVerification from "../components/PhoneVerification";
 import IDVerification from "../components/IdVerification";
 import ResetPassword from "../components/ResetPassword";
 import ActivityLog from "../components/ActivityLog";
+import { Toaster } from "react-hot-toast"; // Import Toaster for toast notifications
 
 const Profile = () => {
   const [activeTab, setActiveTab] = useState("Profile");
@@ -24,10 +25,23 @@ const Profile = () => {
     }
   }, []);
 
+  // Load activeTab from localStorage on initial load
+  useEffect(() => {
+    const storedTab = localStorage.getItem("activeTab");
+    if (storedTab) {
+      setActiveTab(storedTab);
+    }
+  }, []);
+
   // Save profile data to localStorage when it changes
   useEffect(() => {
     localStorage.setItem("profile", JSON.stringify(profile));
   }, [profile]);
+
+  // Save activeTab to localStorage when it changes
+  useEffect(() => {
+    localStorage.setItem("activeTab", activeTab);
+  }, [activeTab]);
 
   const handlePhoneNumberUpdate = (newPhoneNumber) => {
     // Update profile contact number after verification
@@ -41,7 +55,7 @@ const Profile = () => {
       case "Profile":
         return <ProfileTab profile={profile} />;
       case "Edit Profile":
-        return <EditProfile profile={profile} setProfile={setProfile} />;
+        return <EditProfile profile={profile} setProfile={setProfile} setActiveTab={setActiveTab} />;
       case "Phone Verification":
         return <PhoneVerification phoneNumber={profile.contact} setPhoneNumber={handlePhoneNumberUpdate} />;
       case "ID Verification":
@@ -56,10 +70,10 @@ const Profile = () => {
   };
 
   return (
-    <div className="pt-16 bg-gray-100 font-sans min-h-screen  dark:bg-slate-900">
+    <div className="pt-16 bg-gray-100 font-sans min-h-screen dark:bg-slate-900">
       {/* Header */}
-      <header className="bg-gradient-to-r from-blue-500 to-blue-800 py-6 sm:py-4   ">
-        <div className="container mx-auto px-6 sm:px-4 flex flex-col md:flex-row justify-between items-center ">
+      <header className="bg-gradient-to-r from-blue-500 to-blue-800 py-6 sm:py-4">
+        <div className="container mx-auto px-6 sm:px-4 flex flex-col md:flex-row justify-between items-center">
           <h1 className="text-white text-2xl sm:text-lg font-bold text-center md:text-left">
             My Profile
           </h1>
@@ -77,10 +91,10 @@ const Profile = () => {
       </header>
 
       {/* Tabs Navigation */}
-      <main className="container mx-auto px-6 sm:px-4 py-10 sm:py-6 max-w-screen-lg dark:bg-darkGrey ">
+      <main className="container mx-auto px-6 sm:px-4 py-10 sm:py-6 max-w-screen-lg dark:bg-darkGrey">
         <div className="bg-white shadow-lg rounded-lg dark:bg-darkGrey border-4 border-primary">
           {/* Tabs */}
-          <nav className="flex space-x-4 border-b border-gray-200 px-6 sm:px-4 py-4 overflow-x-auto ">
+          <nav className="flex space-x-4 border-b border-gray-200 px-6 sm:px-4 py-4 overflow-x-auto">
             {[
               "Profile",
               "Edit Profile",
@@ -95,7 +109,7 @@ const Profile = () => {
                 className={`text-sm font-medium whitespace-nowrap ${
                   activeTab === tab
                     ? "text-primary border-b-2 border-primary pb-2"
-                    : "text-gray-500 hover:text-primary"
+                    : "text-gray-500 hover:text-primary dark:text-white"
                 }`}
               >
                 {tab}
@@ -110,6 +124,7 @@ const Profile = () => {
           </div>
         </div>
       </main>
+      <Toaster /> {/* Add Toaster for toast notifications */}
     </div>
   );
 };

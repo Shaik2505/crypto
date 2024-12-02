@@ -17,9 +17,9 @@ const ThemeBtn = ({ className }) => {
     <>
       <button className={className} onClick={toggleTheme}>
         {themeMode === "light" ? (
-          <IoMdMoon color="White" size={28} />
+          <IoMdMoon color="White" size={25} />
         ) : (
-          <IoMdSunny color="White" size={28} />
+          <IoMdSunny color="White" size={25} />
         )}
       </button>
     </>

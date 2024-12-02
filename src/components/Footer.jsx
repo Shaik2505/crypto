@@ -12,7 +12,7 @@ import { FaRegCopyright } from "react-icons/fa";
 
 const Footer = () => {
   return (
-    <footer className="bg-white dark:bg-offBlack text-darkGrey dark:text-offWhite py-8">
+    <footer className="bg-white  text-darkGrey dark:text-offWhite py-8 dark:bg-darkGrey">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Main Content */}
         <div className="grid grid-cols-4 sm:grid-cols-2 lg:grid-cols-4 gap-8">

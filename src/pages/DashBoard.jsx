@@ -1,58 +1,102 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import {
-  PieChart,
-  Pie,
-  Cell,
-  Tooltip as PieTooltip,
-  ResponsiveContainer,
-} from "recharts";
-import Slider from "react-slick";
-import "slick-carousel/slick/slick.css";
-import "slick-carousel/slick/slick-theme.css";
-import { useDebounce } from "use-debounce"; // A simple hook for debouncing
-import Spinner from "../components/Spinner";
+import { useDebounce } from "use-debounce";
 import { Link } from "react-router-dom";
+import PortfolioTable from "../components/Dashboard/PortfolioTable";
+import PortfolioDistribution from "../components/Dashboard/PortfolioDistribution";
+import MarketAnalysis from "../components/Dashboard/MarketAnalysis";
+import PriceTrend from "../components/Dashboard/PriceTrend";
+import MarketComparison from "../components/Dashboard/MarketComparison";
+import TradingVolume from "../components/Dashboard/TradingVolume";
+import TotalBalance from "../components/Dashboard/TotalBalance";
 
 function Dashboard() {
   const [portfolioData, setPortfolioData] = useState([]);
   const [marketData, setMarketData] = useState([]);
   const [totalBalance, setTotalBalance] = useState(0);
   const [loading, setLoading] = useState(true);
-  const [searchQuery, setSearchQuery] = useState(""); // State for search query
-  const [debouncedSearchQuery] = useDebounce(searchQuery, 500); // Debounced search query
+  const [searchQuery, setSearchQuery] = useState("");
+  const [debouncedSearchQuery] = useDebounce(searchQuery, 500);
 
-  // Fetch portfolio and market data
+  const portfolio = [
+    { id: "bitcoin", quantity: 10 },
+    { id: "litecoin", quantity: 10 },
+    { id: "ethereum", quantity: 10 },
+    { id: "solana", quantity: 10 },
+  ];
+
+  const dummyData = [
+    { id: "bitcoin", current_price: 30000, name: "Bitcoin" },
+    { id: "litecoin", current_price: 150, name: "Litecoin" },
+    { id: "ethereum", current_price: 2000, name: "Ethereum" },
+    { id: "solana", current_price: 100, name: "Solana" },
+  ];
+
+  const fetchWithRetry = async (url, options = {}, retries = 3, delay = 1000) => {
+    try {
+      const response = await axios(url, options);
+      return response;
+    } catch (error) {
+      if (retries > 0 && error.response && error.response.status === 429) {
+        // Extract the 'Retry-After' header if available (in seconds)
+        const retryAfter = error.response.headers["retry-after"]
+          ? parseInt(error.response.headers["retry-after"], 10) * 1000 // Convert to ms
+          : delay;
+
+        console.log(`Rate limit exceeded, retrying after ${retryAfter}ms...`);
+        await new Promise((resolve) => setTimeout(resolve, retryAfter)); // Wait before retrying
+        return fetchWithRetry(url, options, retries - 1, retryAfter);
+      } else {
+        throw error; // Rethrow if no retries left or error is not 429
+      }
+    }
+  };
+
   useEffect(() => {
     const fetchPortfolioData = async () => {
       setLoading(true);
       try {
-        const portfolioResponse = await axios.get(
+        const portfolioResponse = await fetchWithRetry(
           "https://api.coingecko.com/api/v3/coins/markets",
           {
             params: {
               vs_currency: "usd",
-              ids: "bitcoin,litecoin,ethereum,solana", // Top 4 cryptos
+              ids: portfolio.map((coin) => coin.id).join(","),
             },
           }
         );
 
-        setPortfolioData(portfolioResponse.data);
+        if (portfolioResponse.data.length > 0) {
+          setPortfolioData(portfolioResponse.data);
+        } else {
+          setPortfolioData(dummyData);
+        }
 
-        const total = portfolioResponse.data.reduce((acc, item) => {
-          return acc + item.current_price * 10; // Assuming 10 units for each coin
-        }, 0);
+        // Calculate the total portfolio value (assuming 10 units of each coin)
+        const total = (portfolioResponse.data.length > 0 ? portfolioResponse.data : dummyData).reduce(
+          (acc, item) => {
+            const coin = portfolio.find((c) => c.id === item.id);
+            return acc + item.current_price * coin.quantity;
+          },
+          0
+        );
 
         setTotalBalance(total);
       } catch (error) {
-        console.error("Error fetching portfolio data from CoinGecko", error);
+        console.error("Error fetching portfolio data, using dummy data", error);
+        setPortfolioData(dummyData);
+        const total = dummyData.reduce((acc, item) => {
+          const coin = portfolio.find((c) => c.id === item.id);
+          return acc + item.current_price * coin.quantity;
+        }, 0);
+        setTotalBalance(total);
       }
       setLoading(false);
     };
 
     const fetchMarketData = async () => {
       try {
-        const marketResponse = await axios.get(
+        const marketResponse = await fetchWithRetry(
           "https://api.coingecko.com/api/v3/coins/markets",
           {
             params: {
@@ -65,22 +109,21 @@ function Dashboard() {
         );
         setMarketData(marketResponse.data);
       } catch (error) {
-        console.error("Error fetching market data from CoinGecko", error);
+        console.error("Error fetching market data", error);
       }
     };
 
     fetchPortfolioData();
     fetchMarketData();
-    const interval = setInterval(fetchMarketData, 5000); // Update market data every 5 seconds
-    return () => clearInterval(interval); // Cleanup on unmount
+
+    const interval = setInterval(fetchMarketData, 60000); // Refresh market data every 60 seconds
+    return () => clearInterval(interval);
   }, []);
 
-  // Handle search input change
   const handleSearchChange = (e) => {
     setSearchQuery(e.target.value);
   };
 
-  // Filter data based on search query
   const filteredData = portfolioData.filter((item) => {
     const lowercasedQuery = debouncedSearchQuery.toLowerCase();
     return (
@@ -91,23 +134,19 @@ function Dashboard() {
     );
   });
 
-  // Pie Chart Colors
-  const COLORS = ["#FFBB28", "#00C49F", "#FF8042", "#0088FE"];
-
   return (
     <div className="pt-20 flex flex-col py-12 min-h-screen bg-white text-blue-500 dark:bg-offBlack dark:text-white">
-      {/* Navbar and Profile */}
       <div className="grid grid-cols-1 md:grid-cols-2 sm:grid-cols-1 items-center justify-between px-8 mb-8 gap-6">
         <input
           type="text"
           placeholder="Search by name, symbol, price, market cap..."
-          className="px-4 py-2 rounded-md text-back bg-white border-2 border-blue-400 w-full dark:bg-darkGrey text-white"
+          className="px-4 py-2 rounded-md text-black bg-white border-2 border-blue-400 w-full dark:bg-darkGrey dark:text-white"
           value={searchQuery}
           onChange={handleSearchChange}
         />
         <Link
           to={"/profile"}
-          className="bg-gradient-to-r from-yellow-400 via-primary to-offWhite text-white p-6 sm:p-8 cursor-pointer rounded-lg shadow-xl flex items-center space-x-4 animate-pulse hover:scale-105 duration-200"
+          className="bg-gradient-to-r from-yellow-200 via-primary to-offWhite text-white p-6 sm:p-8 cursor-pointer rounded-lg shadow-xl flex items-center space-x-4 animate-pulse hover:scale-105 duration-200"
         >
           <span className="text-3xl">😎</span>
           <div>
@@ -117,138 +156,14 @@ function Dashboard() {
         </Link>
       </div>
 
-      {/* Dashboard Content */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 px-8">
-        {/* My Portfolio */}
-        <div className="bg-white p-6 rounded-lg border-2 border-blue-400 dark:bg-gradient-to-b from-offBlack to-primary shadow-lg dark:shadow-white">
-          <h2 className="text-xl font-bold mb-4 text-blue-500 dark:text-white">My Portfolio</h2>
-          {loading ? (
-            <Spinner />
-          ) : (
-            <Slider
-              dots={true}
-              infinite={true}
-              speed={500}
-              slidesToShow={2}
-              slidesToScroll={1}
-              autoplay={true}
-            >
-              {filteredData.map((item, index) => (
-                <div
-                  key={index}
-                  className="flex flex-col sm:flex-row justify-between py-5 px-4 sm:px-12 border-b border-blue-400 "
-                >
-                  <div className="text-xl sm:text-2xl font-semibold text-blue-500">
-                    {item.name} ({item.symbol.toUpperCase()})
-                  </div>
-                  <div className="text-lg sm:text-xl text-yellow-400">
-                    {`$${item.current_price.toLocaleString()}`}
-                  </div>
-                  <div
-                    className={`${
-                      item.price_change_percentage_24h < 0
-                        ? "text-red-500"
-                        : "text-green-500"
-                    }`}
-                  >
-                    {item.price_change_percentage_24h.toFixed(2)}%
-                  </div>
-                </div>
-              ))}
-            </Slider>
-          )}
-        </div>
-
-        {/* Portfolio Distribution */}
-        <div className="bg-white p-6 rounded-lg border-2 border-blue-400 dark:bg-gradient-to-b from-offBlack to-primary shadow-lg dark:shadow-white">
-          <h2 className="text-xl font-bold mb-4 text-blue-500 dark:text-white">
-            Portfolio Distribution
-          </h2>
-          {loading ? (
-            <Spinner />
-          ) : (
-            <ResponsiveContainer width="100%" height={300}>
-              <PieChart>
-                <Pie
-                  data={filteredData}
-                  dataKey="current_price"
-                  nameKey="name"
-                  cx="50%"
-                  cy="50%"
-                  outerRadius={100}
-                  fill="#8884d8"
-                  label
-                >
-                  {filteredData.map((_, index) => (
-                    <Cell
-                      key={`cell-${index}`}
-                      fill={COLORS[index % COLORS.length]}
-                    />
-                  ))}
-                </Pie>
-                <PieTooltip />
-              </PieChart>
-            </ResponsiveContainer>
-          )}
-        </div>
-
-        {/* Market Analysis */}
-        <div className="bg-white p-6 rounded-lg border-2 border-blue-400 dark:bg-gradient-to-b from-offBlack to-primary shadow-lg dark:shadow-white  ">
-          <h2 className="text-xl font-bold mb-4 text-blue-500 dark:text-white">
-            Market Analysis
-          </h2>
-          {loading ? (
-            <Spinner />
-          ) : (
-            <table className="w-full text-left text-sm text-blue-500 dark:text-white">
-              <thead>
-                <tr>
-                  <th className="py-2">Name</th>
-                  <th className="py-2">Price</th>
-                  <th className="py-2">24h Change</th>
-                </tr>
-              </thead>
-              <tbody>
-                {marketData.map((coin) => (
-                  <tr key={coin.id}>
-                    <td className="py-2">{coin.name}</td>
-                    <td className="py-2">
-                      ${coin.current_price.toLocaleString()}
-                    </td>
-                    <td
-                      className={`py-2 ${
-                        coin.price_change_percentage_24h < 0
-                          ? "text-red-500 font-bold"
-                          : "text-green-500"
-                      }`}
-                    >
-                      {coin.price_change_percentage_24h.toFixed(2)}%
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          )}
-        </div>
-
-        {/* Extended Total Balance */}
-        <div className="bg-white p-6 rounded-lg border-2 border-blue-400 dark:bg-gradient-to-b from-offBlack to-primary shadow-lg dark:shadow-white">
-          <h2 className="text-xl font-bold mb-4 text-blue-500 dark:text-white">
-            Total Balance
-          </h2>
-          {loading ? (
-            <Spinner />
-          ) : (
-            <div className="text-4xl font-bold text-yellow-800 mb-4 dark:text-offWhite">
-              ${totalBalance.toLocaleString()}
-            </div>
-          )}
-          <div className="space-y-2 ">
-            <div className="text-green-500 text-xl dark:text-white">+0.25% Today</div>
-            <div className="text-green-500 text-xl dark:text-white">+4.25% This Week</div>
-            <div className="text-green-500 text-xl dark:text-white">+11.5% This Month</div>
-          </div>
-        </div>
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 px-8">
+        <PortfolioTable loading={loading} data={filteredData} />
+        <PortfolioDistribution loading={loading} data={filteredData} />
+        <MarketAnalysis loading={loading} data={marketData} />
+        <PriceTrend loading={loading} data={filteredData} />
+        <MarketComparison loading={loading} data={marketData} />
+        <TradingVolume loading={loading} data={filteredData} />
+        <TotalBalance loading={loading} totalBalance={totalBalance} portfolioData={portfolioData} />
       </div>
     </div>
   );

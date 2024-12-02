@@ -9,6 +9,7 @@ import PriceTracking from "./pages/PriceTracking";
 import Profile from "./pages/Profile";
 import Notification from "./components/Notification";
 import About from "./pages/About";
+import ProfileTab from "./components/ProfileTab";
 
 // Layout component that includes Navbar
 const LayoutWithNavbar = () => (
@@ -37,6 +38,7 @@ function App() {
         <Route path="/pricetracking" element={<PriceTracking />} />
         <Route path="/profile" element={<Profile />} />
         <Route path="/notification" element={<Notification />} />
+        <Route path="/profiletab" element={<ProfileTab />} />
       </Route>
     </Routes>
     </div>
