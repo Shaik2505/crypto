@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import { FaBell, FaSearch, FaUser } from "react-icons/fa";
+import { FaSearch } from "react-icons/fa";
 import { Link } from "react-router-dom";
 import ThemeBtn from "./ThemeBtn";
 
@@ -95,18 +95,8 @@ const Navbar = () => {
   const navLinks = [
     { to: "/dashboard", label: "Dashboard", key: "dashboard" },
     { to: "/pricetracking", label: "Price Tracking", key: "pricetracking" },
-    {
-      label: (
-        <FaSearch
-          size={25}
-          className="cursor-pointer"
-          onClick={openSearchModal} // Close sidebar and open search modal
-        />
-      ),
-      key: "search-icon",
-    },
-    { to: "/notification", label: <FaBell size={25} />, key: "notification" },
-    { to: "/profile", label: <FaUser size={25} />, key: "profile" },
+    { to: "/notification", label: "Notification", key: "notification" },
+    { to: "/profile", label: "Profile", key: "profile" },
   ];
 
   const buttonClasses =
@@ -123,30 +113,33 @@ const Navbar = () => {
             Techno Clone
           </div>
         </Link>
-        <div className="hidden md:flex space-x-6">
+        <div className="hidden md:flex space-x-6 items-center">
           {navLinks.map((link) => (
             <React.Fragment key={link.key}>
-              {link.to ? (
-                <Link
-                  to={link.to}
-                  className="hover:text-offWhite transition-all duration-300"
-                  onClick={() => setIsSidebarOpen(false)}
-                >
-                  {link.label}
-                </Link>
-              ) : (
-                <span className="hover:text-offWhite transition-all duration-300">
-                  {link.label}
-                </span>
-              )}
+              <Link
+                to={link.to}
+                className="hover:text-offWhite transition-all duration-300"
+              >
+                {link.label}
+              </Link>
             </React.Fragment>
           ))}
+          <FaSearch
+            size={25}
+            className="cursor-pointer hover:text-offWhite transition-all duration-300"
+            onClick={openSearchModal}
+          />
           <ThemeBtn className="mb-2" />
           <Link to={"/"} className="hover:text-offWhite">
             <button className={buttonClasses}>Log Out</button>
           </Link>
         </div>
-        <div className="md:hidden cursor-pointer flex gap-2">
+        <div className="md:hidden cursor-pointer flex gap-2 items-center">
+          <FaSearch
+            size={25}
+            className="cursor-pointer hover:text-offWhite transition-all duration-300"
+            onClick={openSearchModal}
+          />
           <ThemeBtn />
           <span className="text-xl font-bold" onClick={toggleSidebar}>
             {isSidebarOpen ? "✖" : "☰"}
@@ -154,6 +147,7 @@ const Navbar = () => {
         </div>
       </div>
 
+      {/* Sidebar */}
       {isSidebarOpen && (
         <div className="md:hidden fixed inset-0 bg-black bg-opacity-50 z-40">
           <div
@@ -162,19 +156,13 @@ const Navbar = () => {
           >
             {navLinks.map((link) => (
               <React.Fragment key={link.key}>
-                {link.to ? (
-                  <Link
-                    to={link.to}
-                    onClick={() => setIsSidebarOpen(false)}
-                    className="block text-sm text-white py-2 hover:text-offWhite"
-                  >
-                    {link.label}
-                  </Link>
-                ) : (
-                  <span className="block text-sm text-white py-2 hover:text-offWhite">
-                    {link.label}
-                  </span>
-                )}
+                <Link
+                  to={link.to}
+                  onClick={() => setIsSidebarOpen(false)}
+                  className="block text-sm text-white py-2 hover:text-offWhite"
+                >
+                  {link.label}
+                </Link>
               </React.Fragment>
             ))}
             <Link to={"/"}>
@@ -184,8 +172,9 @@ const Navbar = () => {
         </div>
       )}
 
+      {/* Search Modal */}
       {isSearchOpen && (
-        <div className="fixed top-0 left-0 w-full h-full bg-black bg-opacity-50 z-50 flex justify-center items-center pointer-events-auto">
+        <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex justify-center items-center pointer-events-auto">
           <div
             ref={modalRef}
             className="relative w-11/12 sm:w-1/2 lg:w-1/3 bg-white text-black rounded-lg shadow-lg p-6 max-h-[80vh] overflow-y-auto dark:bg-darkGrey"
