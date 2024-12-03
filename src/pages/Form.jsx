@@ -20,7 +20,7 @@ const Form = () => {
 
   const onSubmit = async (data) => {
     setErrorMessage(""); // Clear any previous error messages
-
+  
     if (isSignIn) {
       // Sign-in Logic
       try {
@@ -29,18 +29,24 @@ const Form = () => {
             contact: data.contact,
           },
         });
-
+  
+        console.log("API Response Status:", response.status); // Log the status
+        console.log("API Response Data:", response.data); // Log the data
+  
         if (response.data.length > 0) {
           const user = response.data[0];
+          console.log("User data:", user); // Log user data
+  
           if (user.password === data.password) {
             // Password matches, navigate to home
             console.log("Login Successful");
             navigate("/home");
           } else {
-            // Password does not match
+            console.error("Incorrect password. Please try again.");
             setErrorMessage("Incorrect password. Please try again.");
           }
         } else {
+          console.error("User not found. Please sign up first.");
           setErrorMessage("User not found. Please sign up first.");
         }
       } catch (error) {
@@ -55,7 +61,7 @@ const Form = () => {
           contact: data.contact,
           password: data.password,
         });
-
+  
         console.log("Sign-up Successful", response.data);
         navigate("/home");
       } catch (error) {
@@ -64,6 +70,7 @@ const Form = () => {
       }
     }
   };
+  
 
   const password = watch("password");
 
