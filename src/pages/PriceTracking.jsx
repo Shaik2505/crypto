@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from "react";
-import axios from "axios";
 import CryptoTable from "../components/PriceTracker/CryptoTable";
 import CryptoCharts from "../components/PriceTracker/CryptoCharts";
 
@@ -57,82 +56,18 @@ const staticCoinHistory = {
 };
 
 const PriceTracking = () => {
-  const [coins, setCoins] = useState([]);
+  const [coins, setCoins] = useState(staticCoins);
   const [currency, setCurrency] = useState("usd");
   const [error, setError] = useState("");
   const [search, setSearch] = useState("");
-  const [coinHistory, setCoinHistory] = useState({});
-  const [loading, setLoading] = useState(true);
+  const [coinHistory, setCoinHistory] = useState(staticCoinHistory);
+  const [loading, setLoading] = useState(false);
 
   const currencySymbols = {
     usd: "$",
     eur: "€",
     btc: "₿",
   };
-
-  const fetchData = async () => {
-    setLoading(true);
-    try {
-      const response = await axios.get(
-        `https://api.coingecko.com/api/v3/coins/markets`,
-        {
-          params: {
-            vs_currency: currency,
-            order: "market_cap_desc",
-            per_page: 10,
-            page: 1,
-          },
-        }
-      );
-      setCoins(response.data);
-      setError("");
-      fetchCoinHistory(response.data);
-    } catch (error) {
-      if (error.response && error.response.status === 429) {
-        setCoins(staticCoins);
-        setCoinHistory(staticCoinHistory);
-      } else {
-        setError("Error fetching data");
-      }
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const fetchCoinHistory = async (coins) => {
-    try {
-      const historyData = {};
-      for (const coin of coins) {
-        const response = await axios.get(
-          `https://api.coingecko.com/api/v3/coins/${coin.id}/market_chart`,
-          {
-            params: {
-              vs_currency: currency,
-              days: 7,
-            },
-          }
-        );
-        const formattedData = response.data.prices.map(([time, price]) => ({
-          time: new Date(time).toLocaleDateString(),
-          price,
-        }));
-        historyData[coin.id] = formattedData;
-      }
-      setCoinHistory(historyData);
-    } catch (error) {
-      if (error.response && error.response.status === 429) {
-        setCoinHistory(staticCoinHistory);
-      } else {
-        setError("Error fetching coin history");
-      }
-    }
-  };
-
-  useEffect(() => {
-    fetchData();
-    const interval = setInterval(fetchData, 30000);
-    return () => clearInterval(interval);
-  }, [currency]);
 
   const handleSearch = (e) => {
     setSearch(e.target.value.toLowerCase());

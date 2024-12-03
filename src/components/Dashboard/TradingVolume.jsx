@@ -1,4 +1,3 @@
-// components/TradingVolume.js
 import React from "react";
 import Spinner from "../Spinner";
 
@@ -49,7 +48,9 @@ const TradingVolume = ({ loading, data }) => {
                 <tr key={coin.id}>
                   <td className="py-2">{coin.name}</td>
                   <td className="py-2 text-yellow-400">
-                    ${coin.total_volume.toLocaleString()}
+                    {coin.total_volume !== undefined
+                      ? `$${coin.total_volume.toLocaleString()}`
+                      : "N/A"}
                   </td>
                 </tr>
               ))}

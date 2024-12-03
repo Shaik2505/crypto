@@ -60,7 +60,9 @@ const MarketAnalysis = ({ loading, data }) => {
                         : "text-green-500"
                     }`}
                   >
-                    {coin.price_change_percentage_24h.toFixed(2)}%
+                    {coin.price_change_percentage_24h !== undefined
+                      ? coin.price_change_percentage_24h.toFixed(2)
+                      : "N/A"}%
                   </td>
                 </tr>
               ))}

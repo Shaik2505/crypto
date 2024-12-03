@@ -119,7 +119,7 @@ const Navbar = () => {
           to="/dashboard"
           onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
         >
-          <div className="text-lg font-bold text-primary hover:text-white transition-all duration-300">
+          <div className="text-lg font-bold text-white dark:text-primary transition-all duration-300">
             Techno Clone
           </div>
         </Link>

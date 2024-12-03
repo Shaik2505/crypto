@@ -1,4 +1,3 @@
-// components/PortfolioTable.js
 import React from "react";
 import Spinner from "../Spinner";
 
@@ -54,14 +53,16 @@ const PortfolioTable = ({ loading, data }) => {
               {tableData.map((item, index) => (
                 <tr key={index} className="border-b border-blue-400">
                   <td className="py-2">{item.name}</td>
-                  <td className="py-2">{item.symbol.toUpperCase()}</td>
+                  <td className="py-2">{item.symbol ? item.symbol.toUpperCase() : "N/A"}</td>
                   <td className="py-2 text-yellow-400">${item.current_price.toLocaleString()}</td>
                   <td
                     className={`py-2 ${
                       item.price_change_percentage_24h < 0 ? "text-red-500" : "text-green-500"
                     }`}
                   >
-                    {item.price_change_percentage_24h.toFixed(2)}%
+                    {item.price_change_percentage_24h !== undefined
+                      ? item.price_change_percentage_24h.toFixed(2)
+                      : "N/A"}%
                   </td>
                 </tr>
               ))}

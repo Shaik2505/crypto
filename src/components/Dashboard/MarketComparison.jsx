@@ -51,7 +51,9 @@ const MarketComparison = ({ loading, data }) => {
                 <tr key={coin.id}>
                   <td className="py-2">{coin.name}</td>
                   <td className="py-2 text-yellow-400">
-                    ${coin.market_cap.toLocaleString()}
+                    {coin.market_cap !== undefined
+                      ? `$${coin.market_cap.toLocaleString()}`
+                      : "N/A"}
                   </td>
                   <td
                     className={`py-2 ${
@@ -60,7 +62,9 @@ const MarketComparison = ({ loading, data }) => {
                         : "text-green-500"
                     }`}
                   >
-                    {coin.price_change_percentage_24h.toFixed(2)}%
+                    {coin.price_change_percentage_24h !== undefined
+                      ? coin.price_change_percentage_24h.toFixed(2)
+                      : "N/A"}%
                   </td>
                 </tr>
               ))}
